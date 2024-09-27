@@ -46,7 +46,7 @@ root.title("Gestor de Contraseñas")
 
 # Definir el tamaño de la ventana
 window_width = 600
-window_height = 800
+window_height = 600
 
 # Obtener el tamaño de la pantalla
 screen_width = root.winfo_screenwidth()
@@ -66,7 +66,7 @@ root.config(bg="#f0f0f0")  # Fondo gris claro
 
 # Campo de entrada de datos
 frame = tk.Frame(root, bg="#f0f0f0")
-frame.pack(pady=10)
+frame.pack(pady=20)
 
 tk.Label(frame, text="Ingresa nombre página/aplicación:", bg="#f0f0f0").grid(row=0, column=0, padx=5, pady=5)
 nameEntry = ttk.Entry(frame, width=30)
@@ -117,16 +117,16 @@ slider.grid(row=1, column=2, pady=5)
 
 # Crear checkbuttons para opciones de la contraseña
 check_Mayus = tk.Checkbutton(generate_frame, text="Mayúsculas", variable=var_mayus)
-check_Mayus.grid(row=2, column=1)
+check_Mayus.grid(row=2, column=2)
 
 check_Num = tk.Checkbutton(generate_frame, text="Números", variable=var_num)
-check_Num.grid(row=2, column=2)
+check_Num.grid(row=2, column=3)
 
 check_Symbols = tk.Checkbutton(generate_frame, text="Símbolos", variable=var_symbols)
-check_Symbols.grid(row=2, column=3)
+check_Symbols.grid(row=2, column=4)
 
 btn_generate = ttk.Button(generate_frame, text="Generar contraseña",command=lambda: genPass.generate_password(var_mayus,var_num, var_symbols, passEntry, slider))
-btn_generate.grid(row=2,column=4)
+btn_generate.grid(row=1,column=4)
 
 # Configuración del Treeview
 treeview = ttk.Treeview(root, columns=("Aplicación", "Usuario", "Contraseña"), show="headings", height=10)

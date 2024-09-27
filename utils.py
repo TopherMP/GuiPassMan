@@ -17,12 +17,12 @@ if not os.path.exists("public.pem") or not os.path.exists("private.pem"):
     #with open("PassMan.psman","wb") as file:
     #    file.write(public.save_pkcs1()+private.save_pkcs1())
 
-else:
-    # Read the files
-    with open("public.pem","rb") as pub:
-        public = rsa.PublicKey.load_pkcs1(pub.read())
-    with open("private.pem","rb") as priv:
-        private = rsa.PrivateKey.load_pkcs1(priv.read())
+#else:
+#    # Read the files
+#    with open("public.pem","rb") as pub:
+#        public = rsa.PublicKey.load_pkcs1(pub.read())
+#    with open("private.pem","rb") as priv:
+#        private = rsa.PrivateKey.load_pkcs1(priv.read())
 
 def encrypt(public_key, pswrd):
     encryptfile = rsa.encrypt(pswrd.encode(), public_key)
