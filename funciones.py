@@ -7,7 +7,7 @@ import rsa
 dictJson = utils.load_json("passwords.json", {})
 
 # Read the files
-with open("public.pem","rb") as pub:
+with open("PassMan.pem","rb") as pub:
     public = rsa.PublicKey.load_pkcs1(pub.read())
 
 # Funciones CRUD

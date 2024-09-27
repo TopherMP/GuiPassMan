@@ -2,14 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 import base64
 import rsa
+from tkinter import messagebox
 import funciones, utils, genPass
 
-with open("private.pem","rb") as priv:
+dictJson = utils.load_json("passwords.json", {})
+print(dictJson.get("Password"))
+
+with open("PassMan.pem","rb") as priv:
     private = rsa.PrivateKey.load_pkcs1(priv.read())
 
 # Función para actualizar el Treeview
 def update_treeview(treeview):
-    dictJson = utils.load_json("./passwords.json", {})
+    
     for row in treeview.get_children():
         treeview.delete(row)
     for app, data in dictJson.items():
@@ -39,10 +43,28 @@ def get_Data_Entry(event):
 def updateLabelSlider(e):
     value = int(slider.get())  # Convertir el valor del slider a entero
     sliderValue.config(text=value)  # Actualizar el texto del label con el valor del slider
+
+def closeWindow():
+
+    for name,data in dictJson.items():
+        pswrd = data.get("Password")
+    
+    passCrypt = base64.b64decode(pswrd)
+    passDecrypt = rsa.decrypt(passCrypt)
+    passDecode = passDecrypt.decode()
+
+    public, private = rsa.newkeys(2048)
+    with open("PassMan.pem","wb") as file:
+        file.write(public.save_pkcs1()+private.save_pkcs1())
+    root.destroy()
     
 # Configuración de la ventana principal
 root = tk.Tk()
 root.title("Gestor de Contraseñas")
+
+
+
+root.protocol("WM_DELETE_WINDOW", closeWindow)
 
 # Definir el tamaño de la ventana
 window_width = 600
