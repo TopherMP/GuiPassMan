@@ -3,7 +3,6 @@ from tkinter import ttk
 import base64
 import rsa
 import threading
-import time
 import funciones, utils, genPass
 
 dictJson = utils.load_json("passwords.json", {})
@@ -20,7 +19,13 @@ def update_treeview(treeview):
     for row in treeview.get_children():
         treeview.delete(row)
     for app, data in dictJson.items():
-        treeview.insert("", "end", values=(app, data["User"], data["Password"]))
+
+        passB64 = data["Password"]   # Se obtiene la contraseña que está en formato base64
+        passCrypt = base64.b64decode(passB64)   # Se decodifica la contraseña en base64
+        pswrd = rsa.decrypt(passCrypt, private) # Se desencripta la contraseña con la llave privada
+        pswrdDecode = pswrd.decode()    # Se decodifica de utf-8
+
+        treeview.insert("", "end", values=(app, data["User"], pswrdDecode))
 
 # Obtener los datos del TreeView
 def get_Data_Entry(event):
@@ -31,17 +36,14 @@ def get_Data_Entry(event):
         item = treeview.item(selected_index)
         app_Name = item["values"]
 
-        passB64 = app_Name[2]   # Se obtiene la contraseña que está en formato base64
-        passCrypt = base64.b64decode(passB64)   # Se decodifica la contraseña en base64
-        pswrd = rsa.decrypt(passCrypt, private) # Se desencripta la contraseña con la llave privada
-        pswrdDecode = pswrd.decode()    # Se decodifica de utf-8
+        
 
         nameEntry.delete(0, tk.END)
         nameEntry.insert(0, app_Name[0])
         userEntry.delete(0, tk.END)
         userEntry.insert(0, app_Name[1])
         passEntry.delete(0, tk.END)
-        passEntry.insert(0, pswrdDecode)
+        passEntry.insert(0, app_Name[2])
 
 def updateLabelSlider(e):
     value = int(slider.get())  # Convertir el valor del slider a entero
@@ -91,8 +93,6 @@ def closeWindow():
 # Configuración de la ventana principal
 root = tk.Tk()
 root.title("Gestor de Contraseñas")
-
-
 
 root.protocol("WM_DELETE_WINDOW", closeWindow)
 

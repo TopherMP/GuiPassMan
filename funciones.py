@@ -84,9 +84,6 @@ def update_data(nameEntry, userEntry, passEntry, treeview):
         # Limpiar Entry
         utils.clean_entries(nameEntry, userEntry, passEntry)
 
-        # Mostrar mensaje de actualización
-        messagebox.showinfo("Actualización", f'Datos actualizados para "{app_Name}":\nUsuario: {dictJson[app_Name]["User"]}, Contraseña: {dictJson[app_Name]["Password"]}')
-
     else:
         messagebox.showwarning("Advertencia", "Selecciona un elemento de la lista para actualizar")
 
