@@ -4,18 +4,14 @@ from tkinter import messagebox
 import rsa
 import os
 
-if not os.path.exists("PassMan.pem"):
+if not os.path.exists("private.pem") or not os.path.exists("public.pem"):
     # generate new rsa keys
     public, private = rsa.newkeys(2048)
 
-    ## Write the keys in respective files
-    #with open("public.pem","wb") as pub:
-    #    pub.write(public.save_pkcs1())
-    #with open("private.pem","wb") as priv:
-    #    priv.write(private.save_pkcs1())
-
-    with open("PassMan.pem","wb") as file:
-        file.write(public.save_pkcs1()+private.save_pkcs1())
+    with open("private.pem","wb") as priv:
+        priv.write(private.save_pkcs1())
+    with open("public.pem","wb") as pub:
+        pub.write(public.save_pkcs1())
 
 def encrypt(public_key, pswrd):
     encryptfile = rsa.encrypt(pswrd.encode(), public_key)

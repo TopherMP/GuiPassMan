@@ -6,8 +6,10 @@ import rsa
 # JSON donde se almacenan los datos
 dictJson = utils.load_json("passwords.json", {})
 
-# Read the files
-with open("PassMan.pem","rb") as pub:
+with open("private.pem","rb") as priv:
+    private = rsa.PrivateKey.load_pkcs1(priv.read())
+
+with open("public.pem","rb") as pub:
     public = rsa.PublicKey.load_pkcs1(pub.read())
 
 # Funciones CRUD

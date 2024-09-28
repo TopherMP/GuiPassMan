@@ -2,14 +2,17 @@ import tkinter as tk
 from tkinter import ttk
 import base64
 import rsa
-from tkinter import messagebox
+import threading
+import time
 import funciones, utils, genPass
 
 dictJson = utils.load_json("passwords.json", {})
-print(dictJson.get("Password"))
 
-with open("PassMan.pem","rb") as priv:
+with open("private.pem","rb") as priv:
     private = rsa.PrivateKey.load_pkcs1(priv.read())
+
+with open("public.pem","rb") as pub:
+    public = rsa.PublicKey.load_pkcs1(pub.read())
 
 # Función para actualizar el Treeview
 def update_treeview(treeview):
@@ -28,10 +31,10 @@ def get_Data_Entry(event):
         item = treeview.item(selected_index)
         app_Name = item["values"]
 
-        passB64 = app_Name[2]
-        passCrypt = base64.b64decode(passB64)
-        pswrd = rsa.decrypt(passCrypt, private)
-        pswrdDecode = pswrd.decode()
+        passB64 = app_Name[2]   # Se obtiene la contraseña que está en formato base64
+        passCrypt = base64.b64decode(passB64)   # Se decodifica la contraseña en base64
+        pswrd = rsa.decrypt(passCrypt, private) # Se desencripta la contraseña con la llave privada
+        pswrdDecode = pswrd.decode()    # Se decodifica de utf-8
 
         nameEntry.delete(0, tk.END)
         nameEntry.insert(0, app_Name[0])
@@ -44,18 +47,41 @@ def updateLabelSlider(e):
     value = int(slider.get())  # Convertir el valor del slider a entero
     sliderValue.config(text=value)  # Actualizar el texto del label con el valor del slider
 
-def closeWindow():
+def decryptEncrypt():
+    with open("private.pem","rb") as priv:
+        private = rsa.PrivateKey.load_pkcs1(priv.read())
+
+    with open("public.pem","rb") as pub:
+        public = rsa.PublicKey.load_pkcs1(pub.read())
 
     for name,data in dictJson.items():
         pswrd = data.get("Password")
     
-    passCrypt = base64.b64decode(pswrd)
-    passDecrypt = rsa.decrypt(passCrypt)
-    passDecode = passDecrypt.decode()
+        passCrypt = base64.b64decode(pswrd)
+        passDecrypt = rsa.decrypt(passCrypt, private)
+        passDecode = passDecrypt.decode()
 
-    public, private = rsa.newkeys(2048)
-    with open("PassMan.pem","wb") as file:
-        file.write(public.save_pkcs1()+private.save_pkcs1())
+        public, private = rsa.newkeys(2048)
+
+        with open("private.pem","wb") as priv:
+            priv.write(private.save_pkcs1())
+        with open("public.pem","wb") as pub:
+            pub.write(public.save_pkcs1())
+
+        pswrdCrypt = utils.encrypt(public,passDecode)
+        pswrdb64 = base64.b64encode(pswrdCrypt).decode("utf-8")
+
+        # Agregar en el diccionario
+        dictJson[name] = {
+            "User": data.get("User"),
+            "Password": pswrdb64
+        }
+
+        utils.save_json("passwords.json", dictJson)
+
+def closeWindow():
+    threading.Thread(target=decryptEncrypt).start()
+
     root.destroy()
     
 # Configuración de la ventana principal
