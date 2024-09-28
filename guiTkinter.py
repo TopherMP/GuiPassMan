@@ -48,11 +48,15 @@ def updateLabelSlider(e):
     sliderValue.config(text=value)  # Actualizar el texto del label con el valor del slider
 
 def decryptEncrypt():
+    dictJson = utils.load_json("passwords.json", {})
+
     with open("private.pem","rb") as priv:
         private = rsa.PrivateKey.load_pkcs1(priv.read())
 
     with open("public.pem","rb") as pub:
         public = rsa.PublicKey.load_pkcs1(pub.read())
+
+    dictUpdate = {}
 
     for name,data in dictJson.items():
         pswrd = data.get("Password")
@@ -72,12 +76,12 @@ def decryptEncrypt():
         pswrdb64 = base64.b64encode(pswrdCrypt).decode("utf-8")
 
         # Agregar en el diccionario
-        dictJson[name] = {
+        dictUpdate[name] = {
             "User": data.get("User"),
             "Password": pswrdb64
         }
 
-        utils.save_json("passwords.json", dictJson)
+        utils.save_json("passwords.json", dictUpdate)
 
 def closeWindow():
     threading.Thread(target=decryptEncrypt).start()
