@@ -4,7 +4,7 @@ import base64
 import rsa
 
 # JSON donde se almacenan los datos
-dictJson = utils.load_json("passwords.json", {})
+dictJson = utils.load_json("passwords.json")
 
 with open("private.pem","rb") as priv:
     private = rsa.PrivateKey.load_pkcs1(priv.read())

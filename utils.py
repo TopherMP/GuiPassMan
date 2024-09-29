@@ -6,24 +6,24 @@ import os
 
 if not os.path.exists("private.pem") or not os.path.exists("public.pem"):
     # generate new rsa keys
-    public, private = rsa.newkeys(2048)
+    public, private = rsa.newkeys(1024)
 
     with open("private.pem","wb") as priv:
-        priv.write(private.save_pkcs1())
+        priv.write(private.save_pkcs1('PEM'))
     with open("public.pem","wb") as pub:
-        pub.write(public.save_pkcs1())
+        pub.write(public.save_pkcs1('PEM'))
 
 def encrypt(public_key, pswrd):
     encryptfile = rsa.encrypt(pswrd.encode(), public_key)
     return encryptfile
 
 # Función para cargar datos desde un archivo JSON
-def load_json(filename,data):
+def load_json(filename):
     try:
         with open(filename, 'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        with open(filename, 'w') as file: json.dump(data, file, indent=4)
+        #with open(filename, 'w') as file: json.dump(data, file, indent=4)
         return {}
 
 # Función para guardar datos en un archivo JSON

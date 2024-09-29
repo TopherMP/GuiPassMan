@@ -5,7 +5,7 @@ import rsa
 import threading
 import funciones, utils, genPass
 
-dictJson = utils.load_json("passwords.json", {})
+dictJson = utils.load_json("passwords.json")
 
 with open("private.pem","rb") as priv:
     private = rsa.PrivateKey.load_pkcs1(priv.read())
@@ -16,8 +16,9 @@ with open("public.pem","rb") as pub:
 # Función para actualizar el Treeview
 def update_treeview(treeview):
     
-    for row in treeview.get_children():
-        treeview.delete(row)
+    #for row in treeview.get_children():
+    #    treeview.delete(row)
+
     for app, data in dictJson.items():
 
         passB64 = data["Password"]   # Se obtiene la contraseña que está en formato base64
@@ -36,8 +37,6 @@ def get_Data_Entry(event):
         item = treeview.item(selected_index)
         app_Name = item["values"]
 
-        
-
         nameEntry.delete(0, tk.END)
         nameEntry.insert(0, app_Name[0])
         userEntry.delete(0, tk.END)
@@ -50,40 +49,52 @@ def updateLabelSlider(e):
     sliderValue.config(text=value)  # Actualizar el texto del label con el valor del slider
 
 def decryptEncrypt():
-    dictJson = utils.load_json("passwords.json", {})
+    dictJson = utils.load_json("passwords.json")
 
-    with open("private.pem","rb") as priv:
-        private = rsa.PrivateKey.load_pkcs1(priv.read())
-
-    with open("public.pem","rb") as pub:
-        public = rsa.PublicKey.load_pkcs1(pub.read())
-
-    dictUpdate = {}
+    #with open("private.pem","rb") as priv:
+    #    private = rsa.PrivateKey.load_pkcs1(priv.read())
+    #
+    #with open("public.pem","rb") as pub:
+    #    public = rsa.PublicKey.load_pkcs1(pub.read())
 
     for name,data in dictJson.items():
-        pswrd = data.get("Password")
-    
-        passCrypt = base64.b64decode(pswrd)
-        passDecrypt = rsa.decrypt(passCrypt, private)
-        passDecode = passDecrypt.decode()
 
-        public, private = rsa.newkeys(2048)
+        pswrd = data.get("Password")
+        print(pswrd)
+        print("\n")
+    
+        passCrypto = base64.b64decode(pswrd)
+        print(passCrypto)
+        print("\n")
+        passDecrypt = rsa.decrypt(passCrypto, private)
+        print(passDecrypt)
+        print("\n")
+        passDecode = passDecrypt.decode()
+        print(passDecode)
+        print("\n")
+
+        public, private = rsa.newkeys(1024)
 
         with open("private.pem","wb") as priv:
-            priv.write(private.save_pkcs1())
+            priv.write(private.save_pkcs1('PEM'))
         with open("public.pem","wb") as pub:
-            pub.write(public.save_pkcs1())
+            pub.write(public.save_pkcs1('PEM'))
 
         pswrdCrypt = utils.encrypt(public,passDecode)
+        print(pswrdCrypt)
+        print("\n")
         pswrdb64 = base64.b64encode(pswrdCrypt).decode("utf-8")
+        print(pswrdb64)
+        print("\n")
 
         # Agregar en el diccionario
-        dictUpdate[name] = {
-            "User": data.get("User"),
+        dictJson[name] = {
+            "User": data["User"],
             "Password": pswrdb64
         }
 
-        utils.save_json("passwords.json", dictUpdate)
+        # Guardar datos en el archivo JSON
+        utils.save_json("passwords.json", dictJson)
 
 def closeWindow():
     threading.Thread(target=decryptEncrypt).start()
