@@ -6,14 +6,20 @@ import os
 
 if not os.path.exists("private.pem") or not os.path.exists("public.pem"):
     # generate new rsa keys
-    public, private = rsa.newkeys(1024)
+    publicKey, privateKey = rsa.newkeys(1024)
 
     with open("private.pem","wb") as priv:
-        priv.write(private.save_pkcs1('PEM'))
+        priv.write(privateKey.save_pkcs1('PEM'))
     with open("public.pem","wb") as pub:
-        pub.write(public.save_pkcs1('PEM'))
+        pub.write(publicKey.save_pkcs1('PEM'))
+else:
+    with open("private.pem","rb") as priv:
+        private = rsa.PrivateKey.load_pkcs1(priv.read())
 
-def encrypt(public_key, pswrd):
+    with open("public.pem","rb") as pub:
+        public = rsa.PublicKey.load_pkcs1(pub.read())
+
+def encrypt(pswrd, public_key):
     encryptfile = rsa.encrypt(pswrd.encode(), public_key)
     return encryptfile
 

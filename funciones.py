@@ -18,7 +18,7 @@ def create_data(nameEntry, userEntry, passEntry, treeview):
     user_Mail_App = userEntry.get()
     pass_App = passEntry.get()
 
-    passCrypt = utils.encrypt(public, pass_App)
+    passCrypt = utils.encrypt(pass_App, public)
     passB64 = base64.b64encode(passCrypt).decode("utf-8")
 
     # Verificar que los campos de texto no estén vacíos
@@ -52,7 +52,7 @@ def update_data(nameEntry, userEntry, passEntry, treeview):
     user_Mail_App = userEntry.get()
     pass_App = passEntry.get()
 
-    passCrypt = utils.encrypt(public, pass_App)
+    passCrypt = utils.encrypt(pass_App, public)
     passB64 = base64.b64encode(passCrypt).decode("utf-8")
 
     # Verificar que los campos de texto no estén vacíos
