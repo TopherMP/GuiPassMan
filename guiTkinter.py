@@ -2,10 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 import base64
 import rsa
-import threading
+import os
 import funciones, utils, genPass
 
 dictJson = utils.load_json("passwords.json")
+
 with open("private.pem","rb") as priv:
     privateCrypt = rsa.PrivateKey.load_pkcs1(priv.read())
 
@@ -16,107 +17,36 @@ def update_treeview(treeview):
         treeview.delete(row)
 
     for app, data in dictJson.items():
+        passB64 = data["Password"]   # Se obtiene la contraseña que está en formato base64
+        passCrypt = base64.b64decode(passB64)   # Se decodifica la contraseña en base64
+        pswrd = rsa.decrypt(passCrypt, privateCrypt) # Se desencripta la contraseña con la llave privada
+        pswrdDecode = pswrd.decode()    # Se decodifica de utf-8
 
-        treeview.insert("", "end", values=(app, data["User"], data["Password"]))
+        treeview.insert("", "end", values=(app, data["User"], pswrdDecode))
 
 # Obtener los datos del TreeView
 def get_Data_Entry(event):
-    
     selected_index = treeview.selection()
+    
     if selected_index:
 
         item = treeview.item(selected_index)
         app_Name = item["values"]
-        passB64 = app_Name[2]   # Se obtiene la contraseña que está en formato base64
-        passCrypt = base64.b64decode(passB64)   # Se decodifica la contraseña en base64
-        pswrd = rsa.decrypt(passCrypt, privateCrypt) # Se desencripta la contraseña con la llave privada
-        pswrdDecode = pswrd.decode()    # Se decodifica de utf-8
 
         nameEntry.delete(0, tk.END)
         nameEntry.insert(0, app_Name[0])
         userEntry.delete(0, tk.END)
         userEntry.insert(0, app_Name[1])
         passEntry.delete(0, tk.END)
-        passEntry.insert(0, pswrdDecode)
+        passEntry.insert(0, app_Name[2])
 
 def updateLabelSlider(e):
     value = int(slider.get())  # Convertir el valor del slider a entero
     sliderValue.config(text=value)  # Actualizar el texto del label con el valor del slider
-
-def decryptPass():
-    for name,data in dictJson.items():
-
-        pswrd = data.get("Password")
-        print("contraseña codificada")
-        print(pswrd)
-        print("\n")
-    
-        passCrypto = base64.b64decode(pswrd)
-        print("Contraseña encriptada")
-        print(passCrypto)
-        print("\n")
-
-        passDecrypt = rsa.decrypt(passCrypto, privateCrypt)
-        print("Contraseña desencriptada")
-        print(passDecrypt)
-        print("\n")
-
-        passDecode = passDecrypt.decode()
-        print("Contraseña decodificada")
-        print(passDecode)
-        print("\n")
-
-        # Agregar en el diccionario
-        dictJson[name] = {
-            "User": data["User"],
-            "Password": passDecode
-        }
-
-        # Guardar datos en el archivo JSON
-        utils.save_json("passwords.json", dictJson)
-
-def encryptPass():
-    publicKey, privateKey = rsa.newkeys(1024)
-
-    with open("private.pem","wb") as priv:
-        priv.write(privateKey.save_pkcs1('PEM'))
-    with open("public.pem","wb") as pub:
-        pub.write(publicKey.save_pkcs1('PEM'))
-
-    for name,data in dictJson.items():
-
-        passDecode = data.get("Password")
-        pswrdCrypt = utils.encrypt(publicKey, passDecode)
-        print(pswrdCrypt)
-        print("\n")
-        pswrdb64 = base64.b64encode(pswrdCrypt).decode("utf-8")
-        print(pswrdb64)
-        print("\n")
-
-        # Agregar en el diccionario
-        dictJson[name] = {
-            "User": data["User"],
-            "Password": pswrdb64
-        }
-
-        # Guardar datos en el archivo JSON
-        utils.save_json("passwords.json", dictJson)
-
-def closeWindow():
-    #decryptThread = threading.Thread(target=decryptPass)
-    #decryptThread.start()
-    #decryptThread.join()
-    #encryptThread = threading.Thread(target=encryptPass)
-    #encryptThread.start()
-    #encryptThread.join()
-#
-    root.destroy()
     
 # Configuración de la ventana principal
 root = tk.Tk()
 root.title("Gestor de Contraseñas")
-
-root.protocol("WM_DELETE_WINDOW", closeWindow)
 
 # Definir el tamaño de la ventana
 window_width = 600
